@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <article>
+        <header>
+            <h1>About This Project</h1>
+        </header>
+        
+        <h2>Robust and Interpretable Predictive Maintenance for Evolving Industrial Systems</h2>
+        
+        <p>
+            This is an independent research and development project by <strong>Md. Ehsanul Haque Kanan</strong>, created to showcase an end-to-end, industry-standard approach to predictive maintenance. 
+        </p>
+
+        <h3>Core Objectives:</h3>
+        <ul>
+            <li><strong>Predictive Power:</strong> To accurately predict both Remaining Useful Life (RUL) for degrading systems and specific fault types for event-based failures.</li>
+            <li><strong>Interpretability (XAI):</strong> To move beyond "black box" models by providing clear, human-understandable explanations for each prediction using SHAP (SHapley Additive exPlanations).</li>
+            <li><strong>Robustness & Adaptivity:</strong> To demonstrate how a system can monitor model performance and detect concept drift, which is critical for real-world deployment in "evolving" industrial environments.</li>
+        </ul>
+        
+        <h3>Technology Stack:</h3>
+        <ul>
+            <li><strong>Backend:</strong> Python, Flask</li>
+            <li><strong>Machine Learning:</strong> Scikit-learn, XGBoost, LightGBM, SHAP, Imbalanced-learn</li>
+            <li><strong>Data Handling:</strong> Pandas, NumPy</li>
+            <li><strong>Frontend:</strong> HTML, Pico.css, Plotly.js</li>
+            <li><strong>Deployment:</strong> Docker (to be implemented)</li>
+        </ul>
+    </article>
+{% endblock %}

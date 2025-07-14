@@ -1,0 +1,63 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <header>
+        <h1>Predictive Maintenance Dashboard</h1>
+        <p>Monitoring RUL and Fault Status for Evolving Industrial Systems</p>
+    </header>
+
+    <!-- This is our first row of 3 items -->
+    <div class="grid">
+        {% for asset in assets[:3] %} {# Loop through the first 3 assets #}
+        <article class="asset-card {{ asset.status_class }}">
+            <header>
+                <strong>{{ asset.id }}</strong>
+            </header>
+            
+            <p>
+                <span class="status-indicator {{ asset.status_class | replace('border', 'status') }}"></span>
+                <strong>Status:</strong> {{ asset.status_text }}
+            </p>
+            
+            {% if asset.type == 'rul' %}
+                <p><strong>Predicted RUL:</strong> {{ asset.prediction.predicted_rul }} cycles</p>
+            {% elif asset.type == 'classification' %}
+                <p><strong>Predicted Fault:</strong> {{ asset.prediction.predicted_fault }}</p>
+                <p><strong>Confidence:</strong> {{ (asset.prediction.confidence * 100) | round | int }}%</p>
+            {% endif %}
+            
+            <footer>
+                <a href="{{ url_for('asset_detail', asset_id=asset.id) }}" role="button" class="contrast">View Details</a>
+            </footer>
+        </article>
+        {% endfor %}
+    </div>
+
+    <!-- This is our second row of 3 items -->
+    <div class="grid">
+        {% for asset in assets[3:] %} {# Loop through the remaining assets #}
+        <article class="asset-card {{ asset.status_class }}">
+            <header>
+                <strong>{{ asset.id }}</strong>
+            </header>
+            
+            <p>
+                <span class="status-indicator {{ asset.status_class | replace('border', 'status') }}"></span>
+                <strong>Status:</strong> {{ asset.status_text }}
+            </p>
+            
+            {% if asset.type == 'rul' %}
+                <p><strong>Predicted RUL:</strong> {{ asset.prediction.predicted_rul }} cycles</p>
+            {% elif asset.type == 'classification' %}
+                <p><strong>Predicted Fault:</strong> {{ asset.prediction.predicted_fault }}</p>
+                <p><strong>Confidence:</strong> {{ (asset.prediction.confidence * 100) | round | int }}%</p>
+            {% endif %}
+            
+            <footer>
+                <a href="{{ url_for('asset_detail', asset_id=asset.id) }}" role="button" class="contrast">View Details</a>
+            </footer>
+        </article>
+        {% endfor %}
+    </div>
+
+{% endblock %}

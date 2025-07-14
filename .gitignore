@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment
+pdm_env/
+.venv/
+
+# Data - We don't want to commit large data files to Git
+/data/raw/
+/data/processed/
+
+# IDE / Editor specific
+.vscode/
+.idea/
+
+# OS specific
+.DS_Store
+Thumbs.db

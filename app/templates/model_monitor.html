@@ -1,0 +1,70 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <header>
+        <h1>Model Performance & Adaptivity Monitor</h1>
+        <p>This page demonstrates the system's ability to detect concept drift and monitor performance over time.</p>
+    </header>
+
+    <article>
+        <header><strong>Live Model Accuracy</strong></header>
+        <!-- This is where our accuracy chart will be rendered -->
+        <div id="accuracy-chart-div" style="width:100%; height:500px;"></div>
+    </article>
+    
+    <article>
+        <header><strong>System Logs & Events</strong></header>
+        <div id="log-container">
+            <p><strong>Initial Model Trained:</strong> A baseline model was trained on the first 200 data points.</p>
+            <!-- Drift events will be added here by JavaScript -->
+            <div id="drift-log"></div>
+        </div>
+    </article>
+
+    <!-- Pass data from Flask to JS and draw the chart -->
+    <script>
+        const monitoringData = {{ monitoring_data | tojson }};
+
+        // --- Create the Accuracy Chart ---
+        const accuracyTrace = {
+            x: monitoringData.time_steps,
+            y: monitoringData.accuracies,
+            mode: 'lines+markers',
+            name: 'Model Accuracy'
+        };
+
+        const thresholdTrace = {
+            x: monitoringData.time_steps,
+            y: Array(monitoringData.time_steps.length).fill(monitoringData.drift_threshold),
+            mode: 'lines',
+            name: 'Drift Threshold',
+            line: { dash: 'dash', color: 'red' }
+        };
+
+        const layout = {
+            title: 'Model Accuracy Over Simulated Time',
+            xaxis: { title: 'Time Step (Data Point Index)' },
+            yaxis: { title: 'Accuracy', range: [0, 1] },
+            annotations: [] // We will add drift points here
+        };
+
+        // Add annotations for detected drift points
+        monitoringData.drift_points.forEach(point => {
+            layout.annotations.push({
+                x: point.time,
+                y: monitoringData.drift_threshold,
+                xref: 'x',
+                yref: 'y',
+                text: point.label,
+                showarrow: true,
+                arrowhead: 7,
+                ax: 0,
+                ay: -40
+            });
+            // Also add the event to our log
+            document.getElementById('drift-log').innerHTML += `<p><strong>Drift Detected at Time Step ${Math.round(point.time)}:</strong> Performance dropped below threshold. Retraining should be triggered.</p>`;
+        });
+
+        Plotly.newPlot('accuracy-chart-div', [accuracyTrace, thresholdTrace], layout);
+    </script>
+{% endblock %}
