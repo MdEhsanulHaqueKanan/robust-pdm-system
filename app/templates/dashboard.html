@@ -35,7 +35,7 @@
 
     <!-- This is our second row of 3 items -->
     <div class="grid">
-        {% for asset in assets[3:] %} {# Loop through the remaining assets #}
+        {% for asset in assets[3:6] %} {# Loop through the next 3 assets #}
         <article class="asset-card {{ asset.status_class }}">
             <header>
                 <strong>{{ asset.id }}</strong>

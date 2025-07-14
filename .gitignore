@@ -10,6 +10,7 @@ pdm_env/
 # Data - We don't want to commit large data files to Git
 /data/raw/
 /data/processed/
+ml_models/
 
 # IDE / Editor specific
 .vscode/

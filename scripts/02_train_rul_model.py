@@ -1,38 +1,45 @@
 import pandas as pd
-import numpy as np
 import xgboost as xgb
 from sklearn.preprocessing import StandardScaler
 import joblib
-import config # Import our configuration file
+import logging
+import config
+
+# --- Setup Professional Logging ---
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+
 
 def train_rul_model():
     """
-    Trains the RUL prediction model and saves the model and scaler artifacts.
+    Trains the RUL prediction model using the processed data and saves the
+    final model and scaler artifacts.
     """
-    print("--- Starting RUL Model Training ---")
+    logging.info("--- Starting RUL Model Training ---")
 
     # Load the processed data
     try:
         data = pd.read_csv(config.PROCESSED_DATA_DIR / "rul_processed_data.csv")
-        print(f"Loaded processed RUL data with shape: {data.shape}")
+        logging.info(f"Loaded processed RUL data with shape: {data.shape}")
     except FileNotFoundError:
-        print("Error: Processed RUL data not found.")
-        print("Please run the preprocessing script first: python -m scripts.01_preprocess_data")
+        logging.error(f"Processed RUL data not found at {config.PROCESSED_DATA_DIR}. Aborting.")
+        logging.info("Please run the preprocessing script first: python -m scripts.01_preprocess_data")
         return
 
     # Define features (X) and target (y)
     y = data['RUL']
     X = data.drop(columns=['unit_number', 'time_in_cycles', 'RUL'])
     
-    # --- THIS IS THE CORRECTED SECTION ---
-    # Scale the features and put them back into a DataFrame to preserve column names
+    # Scale the features and preserve column names
     scaler = StandardScaler()
     X_scaled = pd.DataFrame(scaler.fit_transform(X), columns=X.columns)
-    print("Features have been scaled and put back into a DataFrame.")
-    # --- END OF CORRECTION ---
+    logging.info("Features have been scaled.")
 
-    # Train the XGBoost Model (using the best parameters from our notebook)
-    print("Training XGBoost model...")
+    # Train the XGBoost Model
+    logging.info("Training XGBoost regressor...")
     xgb_reg = xgb.XGBRegressor(
         objective='reg:squarederror',
         n_estimators=1000,
@@ -46,12 +53,11 @@ def train_rul_model():
     )
     
     # We train the final model on ALL available data.
-    # We will use a dummy eval set just to enable early stopping.
-    # The model is trained on X_scaled, which is now a DataFrame with feature names.
+    # A dummy eval set is used to enable early stopping.
     xgb_reg.fit(X_scaled, y, eval_set=[(X_scaled, y)], verbose=False)
-    print("Model training complete.")
+    logging.info(f"Model training complete. Best iteration: {xgb_reg.best_iteration}")
 
-    # Save the model and the scaler
+    # Save the model and the scaler artifacts
     config.RUL_MODEL_DIR.mkdir(parents=True, exist_ok=True)
     
     model_path = config.RUL_MODEL_DIR / "rul_predictor.joblib"
@@ -60,9 +66,10 @@ def train_rul_model():
     joblib.dump(xgb_reg, model_path)
     joblib.dump(scaler, scaler_path)
     
-    print(f"Successfully saved RUL model to: {model_path}")
-    print(f"Successfully saved RUL scaler to: {scaler_path}")
+    logging.info(f"Successfully saved RUL model to: {model_path}")
+    logging.info(f"Successfully saved RUL scaler to: {scaler_path}")
+    logging.info("--- RUL Model Training Script Finished ---")
+
 
 if __name__ == '__main__':
     train_rul_model()
-    print("\nRUL model training script finished.")

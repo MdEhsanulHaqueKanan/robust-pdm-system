@@ -1,0 +1,12 @@
+.git
+.gitignore
+.pytest_cache/
+*.pyc
+*.pyo
+__pycache__/
+.ipynb_checkpoints/
+*.egg-info/
+dist/
+build/
+venv/
+pdm_env/ # Exclude our local conda environment

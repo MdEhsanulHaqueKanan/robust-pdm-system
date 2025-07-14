@@ -39,7 +39,7 @@
         if (Object.keys(historicalData).length > 0) {
             const traces = [];
             for (const sensor in historicalData) {
-                if (sensor !== 'time_in_cycles') {
+                if (sensor !== 'time_in_cycles' && !sensor.includes('_rolling') && sensor !== 'unit_number' && sensor !== 'RUL') {
                     traces.push({
                         x: historicalData.time_in_cycles,
                         y: historicalData[sensor],
@@ -64,15 +64,21 @@
         document.addEventListener('DOMContentLoaded', function() {
             const assetType = '{{ asset_type }}';
 
+            // --- Function to display a SHAP plot ---
+            function displayShapPlot(shapData) {
+                const shapContainer = document.getElementById('shap-plot-container');
+                if (shapData) {
+                    shapContainer.innerHTML = `<img src="${shapData}" alt="SHAP explanation plot" style="width: 100%;">`;
+                } else {
+                    shapContainer.innerHTML = '<p>Could not generate explanation plot.</p>';
+                }
+            }
+
             if (assetType === 'rul') {
                 // --- RUL Prediction Logic ---
                 document.getElementById('pred-fault').textContent = 'N/A';
                 document.getElementById('pred-confidence').textContent = 'N/A';
-                document.getElementById('shap-plot-container').innerHTML = '<p>SHAP explanations for RUL models will be implemented in a future version.</p>';
-
-                // The payload for the RUL model is the entire history.
-                // Our backend utils function is designed to handle it.
-                // We restructure the historicalData object into the format the API expects (list of records).
+                
                 const rulPayloadData = historicalData.time_in_cycles.map((_, i) => {
                     const record = {};
                     for (const key in historicalData) {
@@ -81,12 +87,7 @@
                     return record;
                 });
                 
-                // For a real-time prediction, we only need the latest data, but our util
-                // function expects a history to calculate rolling features. We pass the whole history.
-                const apiPayload = {
-                    type: 'rul',
-                    data: rulPayloadData
-                };
+                const apiPayload = { type: 'rul', data: rulPayloadData };
 
                 fetch('/api/predict', {
                     method: 'POST',
@@ -96,12 +97,10 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
-                        console.error('API Error:', data.error);
                         document.getElementById('pred-rul').textContent = 'Error';
                     } else {
                         const rul = data.predicted_rul;
                         document.getElementById('pred-rul').textContent = `${rul} cycles`;
-                        // Simple recommendation logic based on predicted RUL
                         if (rul < 30) {
                             document.getElementById('pred-recommendation').textContent = 'Critical RUL. Immediate inspection and maintenance required.';
                         } else if (rul < 60) {
@@ -109,6 +108,7 @@
                         } else {
                             document.getElementById('pred-recommendation').textContent = 'Engine operating within expected parameters.';
                         }
+                        displayShapPlot(data.shap_plot);
                     }
                 })
                 .catch(error => {
@@ -117,21 +117,15 @@
                 });
 
             } else if (assetType === 'classification') {
-                // --- Classification Prediction Logic (our existing code) ---
+                // --- Classification Prediction Logic ---
                 document.getElementById('pred-rul').textContent = 'N/A'; 
                 
                 const currentMachineState = {
-                    "type": "L",
-                    "air_temperature": 301.5,
-                    "process_temperature": 310.8,
-                    "rotational_speed": 1422,
-                    "torque": 49.3,
-                    "tool_wear": 193
+                    "type": "L", "air_temperature": 301.5, "process_temperature": 310.8,
+                    "rotational_speed": 1422, "torque": 49.3, "tool_wear": 193
                 };
-                const apiPayload = {
-                    type: 'classification',
-                    data: [currentMachineState]
-                };
+                const apiPayload = { type: 'classification', data: [currentMachineState] };
+
                 fetch('/api/predict', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -140,7 +134,6 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.error) {
-                        console.error('API Error:', data.error);
                         document.getElementById('pred-fault').textContent = 'Error';
                     } else {
                         document.getElementById('pred-fault').textContent = data.predicted_fault;
@@ -150,16 +143,12 @@
                         } else {
                             document.getElementById('pred-recommendation').textContent = 'Asset operating within normal parameters.';
                         }
-                        if (data.shap_plot) {
-                            document.getElementById('shap-plot-container').innerHTML = `<img src="${data.shap_plot}" alt="SHAP explanation plot" style="width: 100%;">`;
-                        } else {
-                             document.getElementById('shap-plot-container').innerHTML = '<p>Could not generate explanation plot.</p>';
-                        }
+                        displayShapPlot(data.shap_plot);
                     }
                 })
                 .catch(error => {
                     console.error('Fetch Error:', error);
-                    document.getElementById('pred-rul').textContent = 'Failed to fetch prediction.';
+                    document.getElementById('pred-fault').textContent = 'Failed to fetch prediction.';
                 });
             }
         });
