@@ -30,7 +30,7 @@ The project highlights a comprehensive understanding of the entire Machine Learn
 
 ---
 
-## Quantified Impact
+## Key Results & Achievements
 
 This project delivers tangible results, demonstrating both strong predictive performance and robust operational capabilities:
 
