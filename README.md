@@ -30,6 +30,20 @@ The project highlights a comprehensive understanding of the entire Machine Learn
 
 ---
 
+---
+
+## Quantified Impact
+
+This project delivers tangible results, demonstrating both strong predictive performance and robust operational capabilities:
+
+*   **RUL Prediction Accuracy:** Achieved a **Root Mean Squared Error (RMSE) of 15.82 cycles** (with an **R² of 0.85**) for Remaining Useful Life predictions on unseen turbofan engine data.
+*   **Fault Detection Precision:** Successfully identified critical fault types with **up to 95% Recall** on highly imbalanced datasets (minority classes representing **only 3.39%** of samples), ensuring few crucial failures are missed.
+*   **Dashboard Performance Optimization:** Reduced dashboard load time from **over 5 minutes to under 5 seconds** by implementing intelligent, on-demand XAI generation.
+*   **Automated Reliability:** Ensured API and model reliability through a comprehensive suite of **automated `pytest` unit tests**, maintaining robust system behavior.
+*   **Reproducible Deployment:** Successfully containerized the entire multi-service application with Docker, enabling seamless and consistent deployment across diverse environments.
+
+---
+
 ## Screenshots
 
 Take a look at the application in action:
